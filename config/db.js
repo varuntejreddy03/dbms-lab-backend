@@ -1,8 +1,9 @@
-// in api/config/db.js
+// in config/db.js
 
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
+// Create the connection pool
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
@@ -12,10 +13,20 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  // Add this ssl object to enforce a secure connection
   ssl: {
     rejectUnauthorized: true
   }
 });
 
-// ... rest of the file is the same
+// This connection test is for logging purposes only
+pool.getConnection()
+  .then(connection => {
+    console.log('MySQL Database connected successfully!');
+    connection.release();
+  })
+  .catch(error => {
+    console.error('Error connecting to MySQL Database:', error.message);
+  });
+
+// **CRITICAL FIX:** Make sure you export the pool at the end.
+module.exports = pool;
