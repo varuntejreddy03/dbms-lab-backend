@@ -1,9 +1,8 @@
-// in config/db.js
-
 const mysql = require('mysql2/promise');
+const fs = require('fs'); // Required to read files
+const path = require('path'); // Required to build file paths reliably
 require('dotenv').config();
 
-// Create the connection pool
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
@@ -14,11 +13,11 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
   ssl: {
-    rejectUnauthorized: true
+    // This looks for 'ca.pem' in the same directory as this file
+    ca: fs.readFileSync(path.join(__dirname, 'ca.pem')),
   }
 });
 
-// This connection test is for logging purposes only
 pool.getConnection()
   .then(connection => {
     console.log('MySQL Database connected successfully!');
@@ -28,5 +27,4 @@ pool.getConnection()
     console.error('Error connecting to MySQL Database:', error.message);
   });
 
-// **CRITICAL FIX:** Make sure you export the pool at the end.
 module.exports = pool;
